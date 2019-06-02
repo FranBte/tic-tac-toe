@@ -1,0 +1,158 @@
+* {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 10vmin;
+    font-family: 'Raleway', sans-serif;
+}
+
+h1 {
+    font-size: 1em;
+    margin: 2vmin;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.scoreboard {
+    display: flex;
+    margin: 2vmin;
+    padding: 0 6vmin 0 6vmin;
+    width: 60vmin;
+    justify-content: space-between;
+}
+
+#score--stat1, #score--stat2 {
+    font-size: 3.4vmin;
+}
+
+.board {
+    height: 60vmin;
+    width: 60vmin;
+    border: 2px solid black;
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.cell {
+    border: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.btn-game,
+.btn-restart,
+.choice-o,
+.choice-x {
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 1vmin;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    margin: 3vmin;
+    font-size: 3vmin;
+    border: .5vmin solid black;
+    border-radius: 0.5vmin;
+}
+
+.btn-game:hover {
+    transform: scale(1.1);
+    box-shadow: .5vmin .5vmin 1vmin black;
+}
+
+.btn-game:active {
+    transform: scale(0.9);
+}
+
+.modal,
+.modal-choice {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(1.1);
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+}
+
+.modal-content,
+.modal-start {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 1vmin 1.5vmin;
+    width: 50vmin;
+    height: 40vmin;
+    border-radius: 0.2rem;
+    text-align: center;
+}
+
+.close-button {
+    float: right;
+    width: .5rem;
+    line-height: .5rem;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 0.1rem;
+    border: 0.2vmin solid lightgray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4.5vmin;
+}
+
+.close-button:hover {
+    border: 0.2vmin solid darkgray;
+}
+
+.show-modal {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1.0);
+    transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
+}
+
+.header-3 {
+    margin-left: 7vmin;
+    font-size: 5vmin;
+}
+
+.won {
+    font-size: 4vmin;
+    margin: 4vmin;
+}
+
+.modal-start>.header-3 {
+    margin: 0;
+}
+
+.choice-x,
+.choice-o {
+    font-size: 8vmin;
+    width: 15vmin;
+}
+
+.choice-x:hover, .choice-o:hover {
+    transform: scale(1.1);
+    box-shadow: .5vmin .5vmin 1.2vmin black;
+
+    /* box-shadow:  */
+}
