@@ -1,11 +1,12 @@
-const nought = "O";
-const cross = "X";
+const winColor = "#32CD32"
 
 function Cell(element) {
     this.element = element;
     this.type = "";
     this.value = 0;
-    this.element.style.backGroundColor = "white";
+    this.winner = function () {
+        this.element.style.backgroundColor = winColor;
+    };
     this.select = function (symbol) {
         if (!(this.type === "")) {
             return false;
@@ -20,21 +21,27 @@ function Cell(element) {
             }
             return true;
         }
-
         return false;
-
     }
     this.reset = function () {
         this.type = "";
         this.value = 0;
         this.element.innerHTML = "";
+        this.element.style.backgroundColor = "transparent";
     }
 }
 
-function Player(symbol) {
+function Player(symbol, scoreboardElement) {
     this.symbol = symbol;
+    this.score = 0;
+    this.scoreboardElement = scoreboardElement;
+    this.scoreboardElement.textContent = `Player ${this.symbol} : ${this.score}`
     this.getSymbol = function () {
         return this.symbol;
+    }
+    this.incrementScore = function (num) {
+        this.score += num;
+        this.scoreboardElement.textContent = `Player ${this.symbol} : ${this.score}`;
     }
 }
 
@@ -43,11 +50,7 @@ function Board() {
     this.currentPlayer;
     this.turnsTaken = 0;
     this.endGameDetected = false;
-    this.playerChoice;
-    this.playerOneScore = 0;
-    this.playerTwoScore = 0;
-    this.statOne = document.getElementById("score--stat1");
-    this.statTwo = document.getElementById("score--stat2");;
+
     this.modal = document.querySelector(".modal");
     this.toggleModal = function () {
         this.modal.classList.toggle("show-modal");
@@ -55,37 +58,25 @@ function Board() {
     this.startGame = function () {
         modalStart = document.querySelector(".modal-choice");
         modalStart.classList.toggle("show-modal");
-
     }
     this.choice = function () {
-        // let playerChoice;
         let b = this;
-        let choiceX = document.querySelector(".choice-x");
-        let choiceO = document.querySelector(".choice-o");
-        choiceX.addEventListener("click", function () {
-            b.playerChoice = true;
-            b.startGame();
-            b.setUp();
-        });
-        choiceO.addEventListener("click", function () {
-            b.playerChoice = false;
-            b.startGame();
-            b.setUp();
-        });
+        let choices = document.querySelectorAll(".choice");
+        let scoreboardElements = document.querySelectorAll(".score");
+        for (let i = 0; i < choices.length; i++) {
+            choices[i].addEventListener("click", () => {
+                let playerOne = new Player(choices[i].innerHTML, scoreboardElements[0]);
+                let playerTwo = new Player((choices[i].innerHTML === "X") ? "O" : "X", scoreboardElements[1]);
+                b.players.push(playerOne, playerTwo);
+                b.startGame();
+                b.setUp();
+            });
+        }
     }
     this.setUp = function () {
         let cells = document.querySelectorAll(".cell");
-        let scoreboard = document.querySelector(".scoreboard");
-        // let modal = document.querySelector(".modal");
-        let playerOne = new Player("X");
-        let playerTwo = new Player("O");
-        this.players.push(playerOne, playerTwo);
-        if (this.playerChoice === true) {
-            this.currentPlayer = playerOne;
-        } else {
-            this.currentPlayer = playerTwo;
-        }
-        //  populate cells array with cell elements. 
+
+        this.currentPlayer = this.players[0];
         let curArr = 0;
         for (let i = 0; i < cells.length; i++) {
             if (this.cells[curArr].length === 3) {
@@ -94,125 +85,69 @@ function Board() {
             //get the board
             let b = this;
             //get instance of current player
-            // c refers to cell constructor (element)
             let c = new Cell(cells[i]);
             this.cells[curArr].push(c);
 
             let closeButton = document.querySelector(".close-button");
             closeButton.addEventListener("click", function () {
                 b.toggleModal();
-                // b.restart();
             });
 
             c.element.addEventListener("click", () => {
                 if (!b.endGameDetected) {
                     if (c.select(b.currentPlayer.symbol)) {
-                        b.changePlayer();
                         b.turnsTaken++;
-                        b.endGameDetected = b.isGameOver();
+                        let endGameResults = b.isGameOver();
+    
+                        if (endGameResults.winningCells.length === 3) {
+                            b.endGameDetected = true;
+                            for (let i = 0; i < endGameResults.winningCells.length; i++) {
+                                endGameResults.winningCells[i].winner();
+                            }
+                            b.endgameScreen(b.currentPlayer.symbol, endGameResults.winPosition);
+                            b.currentPlayer.incrementScore(1);
+                            b.toggleModal();
+                        }
+                        b.changePlayer();
                     }
-                }
-                if (b.endGameDetected) {
-                    b.toggleModal();
                 }
             });
         }
-
     }
     this.isGameOver = function () {
-        let headerEndGame = document.querySelector(".end-game");
-        let counterDia, counterDiaL, offsetInvertDia, winningCells;
+        let counterDia, counterDiaL, offsetInvertDia, outcome;
         counterDia = 0;
         counterDiaL = 0;
         offsetInvertDia = 2;
-        winningCells = [];
-        // let cell = this.cells[0][0];
+        outcome = {
+            winPosition: "",
+            winningCells: []
+        };
 
         for (let i = 0; i <= 2; i++) {
             let counterAcross = 0;
             let counterDown = 0;
-            let row1 = 0;
-            let row2 = 0;
-            let row3 = 0;
-            let column1 = 0;
-            let column2 = 0;
-            let column3 = 0;
-            //checks if game is won across
-            for (let j = 0; j <= 2; j++) {
 
+            for (let j = 0; j <= 2; j++) {
                 counterAcross += this.cells[i][j].value;
                 counterDown += this.cells[j][i].value;
 
-                //check each row and column
-                row1 += this.cells[0][j].value;
-                row2 += this.cells[1][j].value;
-                row3 += this.cells[2][j].value;
-                column1 += this.cells[j][0].value;
-                column2 += this.cells[j][1].value;
-                column3 += this.cells[j][2].value;
-                if ((row1 === 3) || (row1 === -3)) {
-                    for (let x = 0; x <= 2; x++) {
-                        this.cells[0][x].element.style.backgroundColor = "#32CD32";
-                    }
-                }
-                if ((row2 === 3) || (row2 === -3)) {
-                    for (let x = 0; x <= 2; x++) {
-                        this.cells[1][x].element.style.backgroundColor = "#32CD32";
-                    }
-                }
-
-                if ((row3 === 3) || (row3 === -3)) {
-                    for (let x = 0; x <= 2; x++) {
-                        this.cells[2][x].element.style.backgroundColor = "#32CD32";
-                    }
-                }
-
-                if ((column1 === 3) || (column1 === -3)) {
-                    for (let x = 0; x <= 2; x++) {
-                        this.cells[x][0].element.style.backgroundColor = "#32CD32";
-                    }
-                }
-                if ((column2 === 3) || (column2 === -3)) {
-                    for (let x = 0; x <= 2; x++) {
-                        this.cells[x][1].element.style.backgroundColor = "#32CD32";
-                    }
-                }
-                if ((column3 === 3) || (column3 === -3)) {
-                    for (let x = 0; x <= 2; x++) {
-                        this.cells[x][2].element.style.backgroundColor = "#32CD32";
-                    }
-                }
-
-
-                //checking general rows and columns
                 //checks across
-                if (counterAcross === 3) {
-                    // console.log(this.cells[i][j]);
-
-                    headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Crosses won across!</p>');
-                    this.playerOneScore++;
-                    this.statOne.textContent = `Player Crosses: ${this.playerOneScore}`;
-
-                    return true;
-                } else if (counterAcross === -3) {
-                    headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Noughts won across!</p>');
-                    this.playerTwoScore++;
-                    this.statTwo.textContent = `Player Noughts: ${this.playerTwoScore}`;
-                    return true;
-                    //checks down
-                } else if (counterDown === 3) {
-                    headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Crosses won down!</p>');
-                    this.playerOneScore++;
-                    this.statOne.textContent = `Player Crosses: ${this.playerOneScore}`;
-                    return true;
-                } else if (counterDown === -3) {
-                    headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Noughts won down!</p>');
-                    this.playerTwoScore++;
-                    this.statTwo.textContent = `Player Noughts: ${this.playerTwoScore}`;
-                    return true;
+                if ((counterAcross === 3) || (counterAcross === -3)) {
+                    for (let x = 0; x <= 2; x++) {
+                        outcome.winningCells.push(this.cells[i][x]);
+                    }
+                    outcome.winPosition = "across";
+                    return outcome;
                 }
-                // console.log(winningCells);
 
+                if ((counterDown === 3) || (counterDown === -3)) {
+                    for (let x = 0; x <= 2; x++) {
+                        outcome.winningCells.push(this.cells[x][i]);
+                    }
+                    outcome.winPosition = "down";
+                    return outcome;
+                }
             }
             counterDia += this.cells[i][i].value;
             counterDiaL += this.cells[i][offsetInvertDia].value;
@@ -220,34 +155,23 @@ function Board() {
             //checking win state diagonally
             if ((counterDia === 3) || (counterDia === -3)) {
                 for (let x = 0; x <= 2; x++) {
-                    this.cells[x][x].element.style.backgroundColor = "#32CD32";
+                    outcome.winningCells.push(this.cells[x][x]);
                 }
             }
             let = offset = 2;
             if ((counterDiaL === 3) || (counterDiaL === -3)) {
                 for (let x = 0; x <= 2; x++) {
-                    this.cells[x][offset].element.style.backgroundColor = "#32CD32";
+                    outcome.winningCells.push(this.cells[x][offset]);
                     offset--;
                 }
             }
             offsetInvertDia--;
         }
-        if ((counterDia === 3) || (counterDiaL === 3)) {
-            headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Crosses won diagonally!</p>');
-            this.playerOneScore++;
-            this.statOne.textContent = `Player Crosses: ${this.playerOneScore}`;
-            return true;
-        } else if ((counterDia === -3) || (counterDiaL === -3)) {
-            headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Noughts won diagonally!</p>');
-            this.playerTwoScore++;
-            this.statTwo.textContent = `Player Noughts: ${this.playerTwoScore}`;
-            return true;
+        if ((counterDia === 3) || (counterDiaL === 3) || (counterDia === 3) || (counterDiaL === -3)) {
+            outcome.winPosition = "diagonally";
+            return outcome;
         }
-        if (this.turnsTaken === 9) {
-            headerEndGame.insertAdjacentHTML("afterend", '<p class="won">Draw! You both lost!</p>');
-            return true;
-        }
-        return false;
+        return outcome;
     }
     this.changePlayer = function () {
         if (this.currentPlayer === this.players[0]) {
@@ -255,6 +179,10 @@ function Board() {
             return;
         }
         this.currentPlayer = this.players[0];
+    }
+    this.endgameScreen = function (symbol, position) {
+        let headerEndGame = document.querySelector(".end-game");
+        headerEndGame.insertAdjacentHTML("afterend", `<p class="won">${symbol} won ${position}!</p>`);
     }
     this.cells = [
         [],
@@ -264,9 +192,7 @@ function Board() {
     this.restart = function () {
         for (let i = 0; i < this.cells.length; i++) {
             for (let j = 0; j < this.cells.length; j++) {
-                this.cells[i][j].element.style.backgroundColor = "transparent";
                 this.cells[i][j].reset();
-
             }
         }
         this.endGameDetected = false;
@@ -276,7 +202,6 @@ function Board() {
             gameStateDescription.remove();
         }
     }
-
 }
 
 window.addEventListener("load", function () {
@@ -287,7 +212,6 @@ function init() {
     let board = new Board();
     board.startGame();
     board.choice();
-    // board.setUp();
     let resetButton = document.querySelector(".btn-game");
     let restartButton = document.querySelector(".btn-restart")
     restartButton.addEventListener("click", function () {

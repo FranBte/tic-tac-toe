@@ -26,11 +26,11 @@ body {
     display: flex;
     margin: 2vmin;
     padding: 0 6vmin 0 6vmin;
-    width: 60vmin;
+    width: 45vmin;
     justify-content: space-between;
 }
 
-#score--stat1, #score--stat2 {
+.score {
     font-size: 3.4vmin;
 }
 
@@ -53,8 +53,7 @@ body {
 
 .btn-game,
 .btn-restart,
-.choice-o,
-.choice-x {
+.choice {
     background: none;
     color: inherit;
     border: none;
@@ -63,7 +62,7 @@ body {
     cursor: pointer;
     outline: inherit;
     margin: 3vmin;
-    font-size: 3vmin;
+    font-size: 4vmin;
     border: .5vmin solid black;
     border-radius: 0.5vmin;
 }
@@ -75,6 +74,11 @@ body {
 
 .btn-game:active {
     transform: scale(0.9);
+}
+
+.choice:hover {
+    transform: scale(1.1);
+    box-shadow: .5vmin .5vmin 1.2vmin black;
 }
 
 .modal,
@@ -144,15 +148,7 @@ body {
     margin: 0;
 }
 
-.choice-x,
-.choice-o {
+.choice {
     font-size: 8vmin;
     width: 15vmin;
-}
-
-.choice-x:hover, .choice-o:hover {
-    transform: scale(1.1);
-    box-shadow: .5vmin .5vmin 1.2vmin black;
-
-    /* box-shadow:  */
 }
